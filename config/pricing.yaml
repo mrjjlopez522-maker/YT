@@ -7,8 +7,9 @@ allow_unpriced: false
 
 llm:
   offline: {input_per_mtok: 0.0, output_per_mtok: 0.0}
-  # Anthropic prices per million tokens (USD). Verify at https://www.anthropic.com/pricing
-  anthropic: {input_per_mtok: null, output_per_mtok: null}
+  # Anthropic prices per million tokens (USD) for content.anthropic_model
+  # (claude-opus-5-5 list price as of 2026-09). Verify at https://www.anthropic.com/pricing
+  anthropic: {input_per_mtok: 4.00, output_per_mtok: 20.00}
 
 tts:
   espeak: {per_1k_chars: 0.0}

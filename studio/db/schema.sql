@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS research_facts (
     research_id    TEXT NOT NULL REFERENCES research(research_id) ON DELETE CASCADE,
     topic_id       TEXT NOT NULL REFERENCES topics(topic_id) ON DELETE CASCADE,
     local_key      TEXT,               -- id used in notes files (e.g. f3)
+    position       INTEGER NOT NULL DEFAULT 0,  -- authored order within the provider
     text           TEXT NOT NULL,      -- the fact, in our own words when own_words = 1
     own_words      INTEGER NOT NULL DEFAULT 0,
     source_title   TEXT,

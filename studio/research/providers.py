@@ -35,6 +35,7 @@ class Fact:
     extra_sources: list[dict] = field(default_factory=list)
     fact_date: str | None = None
     question: str | None = None
+    position: int = 0
 
 
 @dataclass
@@ -99,7 +100,7 @@ class LocalNotesProvider(ResearchProvider):
                                     reliability=s.get("reliability", "user_notes"),
                                     content=f"notes file: {path.name}")
         errors = []
-        for f in data.get("facts", []):
+        for pos, f in enumerate(data.get("facts", [])):
             cited = [c for c in f.get("sources", []) if c in sources]
             if not f.get("text") or not cited:
                 errors.append(f.get("id", "?"))
@@ -108,7 +109,8 @@ class LocalNotesProvider(ResearchProvider):
             fact = Fact(text=f["text"].strip(), own_words=True, source_title=primary.get("title"),
                         source_url=primary.get("url"), local_key=f.get("id"), tags=list(f.get("tags") or []),
                         extra_sources=[{"title": sources[c].get("title"), "url": sources[c].get("url")} for c in cited[1:]],
-                        fact_date=str(f["date"]) if f.get("date") else None, question=f.get("question"))
+                        fact_date=str(f["date"]) if f.get("date") else None, question=f.get("question"),
+                        position=pos)
             docs[cited[0]].facts.append(fact)
         if errors:
             raise ProviderError(f"Facts without text or a valid citation in {path.name}: {errors}",
@@ -145,7 +147,8 @@ class WikipediaProvider(ResearchProvider):
         facts = []
         for sent in split_sentences(text.replace("\n", " ")):
             if 8 <= len(sent.split()) <= 45 and (numbers_in(sent) or re.search(r"[A-Z][a-z]+ [A-Z][a-z]+", sent)):
-                facts.append(Fact(text=sent, own_words=False, source_title=f"{title} (Wikipedia)", source_url=url))
+                facts.append(Fact(text=sent, own_words=False, source_title=f"{title} (Wikipedia)", source_url=url,
+                                  position=len(facts)))
             if len(facts) >= self.max_facts:
                 break
         doc = ResearchDoc(provider=self.name, title=f"{title} (Wikipedia)", url=url, reliability="tertiary",

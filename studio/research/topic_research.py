@@ -84,6 +84,7 @@ def research_topic(ctx, topic_id: str, providers: list[ResearchProvider] | None 
             for fact in doc.facts:
                 ctx.db.insert("research_facts", {
                     "fact_id": new_id("fact"), "research_id": rid, "topic_id": topic_id, "local_key": fact.local_key,
+                    "position": fact.position,
                     "text": fact.text, "own_words": int(fact.own_words), "source_title": fact.source_title,
                     "source_url": fact.source_url, "extra_sources_json": fact.extra_sources or None,
                     "tags_json": {"tags": fact.tags, "question": fact.question} if (fact.tags or fact.question) else None,
@@ -101,7 +102,8 @@ def research_topic(ctx, topic_id: str, providers: list[ResearchProvider] | None 
 def load_facts(ctx, topic_id: str) -> list[dict]:
     rows = ctx.db.query(
         "SELECT f.*, r.reliability, r.text_license, r.provider FROM research_facts f "
-        "JOIN research r ON r.research_id = f.research_id WHERE f.topic_id = ? ORDER BY f.created_at, f.rowid",
+        "JOIN research r ON r.research_id = f.research_id WHERE f.topic_id = ? "
+        "ORDER BY r.provider, f.position, f.rowid",
         (topic_id,))
     for r in rows:
         meta = r.get("tags_json") or {}

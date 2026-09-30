@@ -87,7 +87,7 @@ NOTES = {
          "sources": ["s1"], "tags": ["payoff", "significance", "computation"]},
     ],
     "hook_ideas": [
-        "This game has rules, a board, and zero players.",
+        "This game has rules, a board, and no players.",
         "In 1970, Conway bet fifty dollars that this could not happen.",
     ],
 }
