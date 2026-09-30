@@ -36,6 +36,7 @@ class Fact:
     fact_date: str | None = None
     question: str | None = None
     position: int = 0
+    requires: list[str] = field(default_factory=list)  # local keys of facts this one depends on
 
 
 @dataclass
@@ -110,7 +111,7 @@ class LocalNotesProvider(ResearchProvider):
                         source_url=primary.get("url"), local_key=f.get("id"), tags=list(f.get("tags") or []),
                         extra_sources=[{"title": sources[c].get("title"), "url": sources[c].get("url")} for c in cited[1:]],
                         fact_date=str(f["date"]) if f.get("date") else None, question=f.get("question"),
-                        position=pos)
+                        position=pos, requires=[str(r) for r in (f.get("requires") or [])])
             docs[cited[0]].facts.append(fact)
         if errors:
             raise ProviderError(f"Facts without text or a valid citation in {path.name}: {errors}",

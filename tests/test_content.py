@@ -150,8 +150,10 @@ def test_llm_writer_request_shape_costs_and_scoring(ctx_with_library):
     hooks = {h["text"]: h for h in s["hooks_json"]}
     assert hooks["Did you know this game is mind-blowing?"]["score"] == 0          # banned
     assert hooks["In 1850 a game changed maths."]["score"] == 0                    # number not in sources
+    long_hook = hooks["Conway offered fifty dollars in 1970 for a pattern that never stops growing."]
+    assert long_hook["score"] == 0 and "too_long" in long_hook["criteria"]      # can't be said within the hook limit
     assert s["selected_hook"] in {"This game has rules, a board, and no players.",
-                                  "Conway offered fifty dollars in 1970 for a pattern that never stops growing."}
+                                  "Five cells can crawl across a grid forever."}
     assert s["factcheck_status"] == "PASSED"
     cost = ctx.db.scalar("SELECT SUM(estimated_usd) FROM costs WHERE topic_id = ?", (t["topic_id"],))
     assert cost == pytest.approx((2000 * 4 + 800 * 20) / 1e6)

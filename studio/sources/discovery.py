@@ -79,10 +79,12 @@ def write_license(ctx, source_id: str, info: LicenseInfo, decision, *, verified_
         "attribution_required": int(decision.attribution_required), "share_alike": int(decision.share_alike),
         "audio_reuse_allowed": int(bool(info.audio_reuse_allowed)), "attribution_text": info.attribution_text,
         "permission_reference": info.permission_reference, "permission_date": info.permission_date,
-        "permission_notes": "; ".join(filter(None, [info.permission_notes, *info.risk_notes])) or None,
+        "permission_notes": info.permission_notes,
         "evidence_json": info.evidence, "evidence_path": str(evidence_path),
         "rights_confidence": decision.rights_confidence, "verification_status": decision.status,
-        "verified_by": verified_by, "reasons_json": decision.reasons, "verified_at": now_iso(),
+        "verified_by": verified_by,
+        "reasons_json": decision.reasons + [f"risk: {r}" for r in dict.fromkeys(info.risk_notes)],
+        "verified_at": now_iso(),
     })
 
 

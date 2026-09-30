@@ -87,7 +87,8 @@ def research_topic(ctx, topic_id: str, providers: list[ResearchProvider] | None 
                     "position": fact.position,
                     "text": fact.text, "own_words": int(fact.own_words), "source_title": fact.source_title,
                     "source_url": fact.source_url, "extra_sources_json": fact.extra_sources or None,
-                    "tags_json": {"tags": fact.tags, "question": fact.question} if (fact.tags or fact.question) else None,
+                    "tags_json": {"tags": fact.tags, "question": fact.question, "requires": fact.requires}
+                    if (fact.tags or fact.question or fact.requires) else None,
                     "fact_date": fact.fact_date, "created_at": now_iso(),
                 })
                 n_facts += 1
@@ -109,6 +110,7 @@ def load_facts(ctx, topic_id: str) -> list[dict]:
         meta = r.get("tags_json") or {}
         r["tags"] = meta.get("tags", []) if isinstance(meta, dict) else []
         r["question"] = meta.get("question") if isinstance(meta, dict) else None
+        r["requires"] = meta.get("requires", []) if isinstance(meta, dict) else []
     return rows
 
 

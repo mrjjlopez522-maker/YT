@@ -161,11 +161,19 @@ def longest_common_run(a: str, b: str) -> int:
 
 
 def estimate_syllables(word: str) -> int:
-    w = word.lower()
+    w = word.lower().replace(",", "")
     if w.isdigit():
-        return max(1, len(w))  # rough: digits read as words
+        # spoken numbers are long: "1970" -> "nineteen seventy", "30" -> "thirty"
+        return 2 if len(w) <= 2 else 4 if len(w) <= 4 else 2 * len(w)
     groups = re.findall(r"[aeiouy]+", w)
     n = len(groups)
     if w.endswith("e") and n > 1 and not w.endswith("le"):
         n -= 1
     return max(1, n)
+
+
+def estimate_speech_seconds(text: str, wpm: int) -> float:
+    """Rough spoken duration: syllables at ~1.45 syllables/word, plus short pauses at commas/colons."""
+    syll = sum(estimate_syllables(re.sub(r"[^\w]", "", w) or "a") for w in text.split())
+    pauses = len(re.findall(r"[,;:—]", text))
+    return syll / (wpm / 60 * 1.45) + 0.18 * pauses

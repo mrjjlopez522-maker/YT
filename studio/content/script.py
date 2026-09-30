@@ -21,8 +21,8 @@ from ..analytics.costs import CostTracker
 from ..errors import ValidationError
 from ..logging_setup import get_logger
 from ..research.topic_research import load_facts, load_hook_ideas
-from ..textutil import (capitalized_terms, longest_common_run, new_id, norm_words, now_iso, numbers_in,
-                        split_sentences, text_similarity, word_count)
+from ..textutil import (capitalized_terms, estimate_speech_seconds, longest_common_run, new_id, norm_words,
+                        now_iso, numbers_in, split_sentences, text_similarity, word_count)
 from . import factcheck, originality, style as style_mod
 from .llm import LLMProvider, build_llm
 
@@ -113,7 +113,8 @@ def offline_hooks(facts: list[dict], hook_ideas: list[str]) -> list[HookCandidat
 
 
 def score_hook(h: HookCandidate, facts_by_id: dict, style_cfg: dict, recent_hooks: list[str], *,
-               weights: dict, min_sources: int, allow_needs_review: bool) -> HookCandidate:
+               weights: dict, min_sources: int, allow_needs_review: bool, wpm: int = 165,
+               max_seconds: float = 4.0) -> HookCandidate:
     n = word_count(h.text)
     banned = style_mod._starts_with(h.text, style_cfg.get("banned_openings", [])) or \
         style_mod._contains(h.text, style_cfg.get("banned_phrases", []))
@@ -132,9 +133,15 @@ def score_hook(h: HookCandidate, facts_by_id: dict, style_cfg: dict, recent_hook
                                 or h.text.strip().endswith("?")) else 0.5,
         "grounded": 1.0 if fc.status in ok_status else 0.0,
     }
+    est = estimate_speech_seconds(h.text, wpm)
+    crit["est_seconds"] = round(est, 2)
+    too_long = est > max_seconds
     h.criteria = crit
     h.factcheck = {"status": fc.status, "notes": fc.notes}
-    h.score = 0.0 if banned or crit["grounded"] == 0 else round(sum(weights.get(k, 0) * v for k, v in crit.items()), 3)
+    h.score = 0.0 if banned or too_long or crit["grounded"] == 0 else \
+        round(sum(weights.get(k, 0) * v for k, v in crit.items() if k != "est_seconds"), 3)
+    if too_long:
+        h.criteria["too_long"] = f"~{est:.1f}s to say (limit {max_seconds}s)"
     if banned:
         h.criteria["banned"] = banned
     return h
@@ -166,12 +173,30 @@ def _relevance(f: dict, payoff_stems: set[str], hook_stems: set[str], fmt: str) 
 
 def offline_sections(facts: list[dict], hook: HookCandidate, budget: int, include_cta: bool,
                      fmt: str = "EXPLAINER", max_setup: int = 2) -> list[dict]:
-    used = set(hook.fact_ids) if hook.strategy != "editor_idea" else set()
-    pool = [f for f in facts if f["fact_id"] not in used]
+    """Arrange researched facts into SETUP / DEVELOPMENT / PAYOFF under a word budget.
+
+    Coherence rules: a question hook's answer is always kept; the rest of a fact whose
+    first sentence became the hook stays in the body; and any fact that is kept keeps
+    the facts it `requires` (declared in the research notes).
+    """
+    by_key = {f.get("local_key"): f["fact_id"] for f in facts if f.get("local_key")}
+    requires = {f["fact_id"]: {by_key[k] for k in f.get("requires", []) if k in by_key} for f in facts}
+    stated_by_hook = hook.strategy in ("first_sentence_of_tagged_fact", "most_specific_fact")
+    answer_ids = set(hook.fact_ids) if hook.strategy == "question" else set()
+    pool = []
+    for f in facts:
+        if stated_by_hook and f["fact_id"] in hook.fact_ids:
+            rest = split_sentences(f["text"])[1:]
+            if rest:  # keep the part of the fact the hook did not say
+                pool.append({**f, "text": " ".join(rest)})
+            continue
+        pool.append(f)
     buckets: dict[str, list[dict]] = {"SETUP": [], "DEVELOPMENT": [], "PAYOFF": []}
     untagged = []
     for f in pool:
         sec = _section_for(f)
+        if f["fact_id"] in answer_ids:
+            sec = "SETUP"  # answer the hook's question early
         (buckets[sec] if sec else untagged).append(f)
     buckets["DEVELOPMENT"].extend(untagged)
     if not buckets["PAYOFF"] and pool:  # the last fact becomes the payoff if none is tagged
@@ -181,22 +206,49 @@ def offline_sections(facts: list[dict], hook: HookCandidate, budget: int, includ
     payoff_stems = set().union(*(factcheck.stems(f["text"]) for f in buckets["PAYOFF"]))
     rel = {f["fact_id"]: _relevance(f, payoff_stems, factcheck.stems(hook.text), fmt) for f in pool}
 
-    def drop_weakest(name: str) -> None:
-        buckets[name].remove(min(buckets[name], key=lambda f: rel[f["fact_id"]]))
+    def kept_ids() -> set[str]:
+        return {f["fact_id"] for v in buckets.values() for f in v}
 
-    while len(buckets["SETUP"]) > max_setup:
-        drop_weakest("SETUP")
+    def protected() -> set[str]:
+        roots = answer_ids | {f["fact_id"] for f in buckets["PAYOFF"]}
+        seen, stack = set(), list(roots)
+        while stack:
+            fid = stack.pop()
+            if fid not in seen:
+                seen.add(fid)
+                stack.extend(requires.get(fid, ()))
+        return seen
 
     def total() -> int:
         return word_count(hook.text) + sum(word_count(f["text"]) for v in buckets.values() for f in v)
 
-    # Trim to the word budget by removing the least connected fact anywhere (one per section minimum).
-    while total() > budget:
-        candidates = [(rel[f["fact_id"]], name, f) for name, fs in buckets.items() if len(fs) > 1 for f in fs]
-        if not candidates:
-            break
-        _, name, weakest = min(candidates, key=lambda c: c[0])
+    def drop_one(limit_to: str | None = None) -> bool:
+        prot = protected()
+        cands = [(rel[f["fact_id"]], name, f) for name, fs in buckets.items() if len(fs) > 1
+                 and (limit_to is None or name == limit_to) for f in fs if f["fact_id"] not in prot]
+        if not cands:
+            return False
+        _, name, weakest = min(cands, key=lambda c: c[0])
         buckets[name].remove(weakest)
+        return True
+
+    while len(buckets["SETUP"]) > max_setup and drop_one("SETUP"):
+        pass
+    while total() > budget and drop_one():
+        pass
+    if total() > budget:
+        log.warning("script is %d words (budget %d): the remaining facts are required for the story to make sense",
+                    total(), budget)
+    # drop facts whose prerequisites were trimmed away (unless they are protected)
+    changed = True
+    while changed:
+        changed = False
+        kept, prot = kept_ids(), protected()
+        for name, fs in buckets.items():
+            for f in list(fs):
+                if f["fact_id"] not in prot and requires.get(f["fact_id"], set()) - kept and len(fs) > 1:
+                    fs.remove(f)
+                    changed = True
     for name in buckets:  # keep the order the researcher wrote
         buckets[name].sort(key=lambda f: (f.get("position", 0), str(f.get("fact_date") or "")))
     sections = [{"name": "HOOK", "sentences": [{"text": hook.text, "fact_ids": hook.fact_ids}]}]
@@ -351,7 +403,8 @@ def generate_script(ctx, topic_id: str, *, video_id: str | None = None, llm: LLM
     weights = {**DEFAULT_HOOK_WEIGHTS, **(style_cfg.get("hook_weights") or {})}
     for h in hooks:
         score_hook(h, facts_by_id, style_cfg, recent["hooks"], weights=weights, min_sources=min_sources,
-                   allow_needs_review=allow_nr)
+                   allow_needs_review=allow_nr, wpm=int(cfg.get("voice.words_per_minute")),
+                   max_seconds=float(cfg.get("qc.max_hook_seconds")))
     ranked = sorted(hooks, key=lambda h: h.score, reverse=True)
     if not ranked or ranked[0].score <= 0:
         raise ValidationError("None of the hook candidates passed the style and fact checks",
