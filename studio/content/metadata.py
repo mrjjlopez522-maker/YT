@@ -170,14 +170,15 @@ def build_metadata(*, topic: dict, script: dict, facts: list[dict], sources: lis
     kws = keywords(text, name, " ".join(f["text"] for f in facts))
     tags = hashtag_sets(name, topic.get("category"), kws)
 
-    short = next((t["title"] for t in titles if word_count(t["title"]) <= 6), name)
+    short = name if word_count(name) <= 4 else next((t["title"] for t in titles if word_count(t["title"]) <= 4),
+                                                    " ".join(content_words(name)[:3]))
     concepts = [
-        {"concept": "strongest_frame", "text": " ".join(short.split()[:4]).upper(),
+        {"concept": "strongest_frame", "text": short.upper(),
          "visual": "best visual moment from the approved footage, with a bold 3-4 word label"},
         {"concept": "key_number_or_date", "text": next((w for w in norm_words(text) if w.isdigit() and len(w) == 4),
                                                        name.split()[0]).upper(),
          "visual": "large date/number over a darkened frame"},
-        {"concept": "question", "text": (blueprint.get("viewer_question") or name)[:40],
+        {"concept": "question", "text": blueprint.get("viewer_question") or name,
          "visual": "clean graphic card with the viewer question"},
     ]
     return {

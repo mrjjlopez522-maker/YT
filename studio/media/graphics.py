@@ -173,22 +173,28 @@ def thumbnail(text: str, frame: Path | None, out: Path, size=(1080, 1920)) -> Pa
     else:
         base = gradient(size)
     img = base.convert("RGBA")
-    f = font(128)
-    lines = wrap(text.upper(), f, SAFE_X[1] - SAFE_X[0])[:3]
+    size_px = 128
+    while True:  # shrink until the whole text fits in four lines — never cut words off
+        f = font(size_px)
+        lines = wrap(text.upper(), f, SAFE_X[1] - SAFE_X[0])
+        if len(lines) <= 4 or size_px <= 56:
+            break
+        size_px -= 8
+    step = int(size_px * 1.17)
     y = 560
     shadow = _canvas(size)
     ds = ImageDraw.Draw(shadow)
     for ln in lines:
         w = f.getlength(ln)
         ds.text(((size[0] - w) / 2 + 6, y + 6), ln, font=f, fill=(0, 0, 0, 220))
-        y += 150
+        y += step
     img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(6)))
     d = ImageDraw.Draw(img)
     y = 560
     for ln in lines:
         w = f.getlength(ln)
         d.text(((size[0] - w) / 2, y), ln, font=f, fill=PALETTE["highlight"])
-        y += 150
+        y += step
     out.parent.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(out, "JPEG", quality=90)
     return out

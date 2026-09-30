@@ -218,8 +218,10 @@ def stage_editing(ctx, video: dict, *, caption_style: str | None = None) -> dict
     for n, concept in enumerate(md.get("thumbnail_concepts") or [], start=1):
         frame = None
         if concept["concept"] == "strongest_frame":
-            footage = next((s for s in scenes if s["visual_type"] == "footage"), None)
-            t = (footage["start_time"] + 0.8) if footage else 1.0
+            # the payoff's footage (the reveal), away from the hook's title card
+            footage = [s for s in scenes if s["visual_type"] == "footage" and s["section"] != "HOOK"]
+            pick = next((s for s in footage if s["section"] == "PAYOFF"), footage[0] if footage else None)
+            t = (pick["start_time"] + pick["end_time"]) / 2 if pick else duration / 2
             frame = ffmpeg.extract_frame(out, t, ctx.ws.visuals_dir(base) / f"thumb_frame_{n}.png")
         thumb = graphics.thumbnail(concept["text"], frame, ctx.ws.thumbnail_path(base, n).with_suffix(".jpg"))
         _asset(ctx, vid, "thumbnail", thumb, meta=concept)

@@ -104,9 +104,9 @@ def build_storyboard(*, sentences: list[dict], total_duration: float, sources: l
         if shot["graphic"]:
             scene["visual_type"] = "graphic"
             scene["effect"] = "slow_zoom_in"
-            key = [w for w in shot["narration"].split()][:9]
+            first_sentence = re.split(r"(?<=[.!?])\s", shot["narration"].strip())[0]
             graphics.append({"type": "background_card", "heading": topic,
-                             "lines": [" ".join(key) + ("…" if len(shot["narration"].split()) > 9 else "")]})
+                             "lines": [short_title(first_sentence, max_chars=48)]})
         else:
             best = max(shot["candidates"], key=lambda c: c[0] - 0.8 * uses.get(c[1], 0) - (1.5 if c[1] == prev_src else 0))
             src = by_id[best[1]]
@@ -168,10 +168,16 @@ def screen_time(scenes: list[dict]) -> dict:
             "longest_source_shot": round(longest, 3), "scenes": len(scenes)}
 
 
-def short_title(text: str, max_words: int = 7) -> str:
+def short_title(text: str, max_chars: int = 60, max_words: int = 9) -> str:
+    """Card text: the whole line if it fits, else its first clause, else a word-limited cut."""
+    text = text.strip()
+    if len(text) <= max_chars:
+        return text
+    clause = re.split(r"[,;:—]", text)[0].strip()
+    if 0 < len(clause) <= max_chars:
+        return clause
     words = text.split()
-    out = " ".join(words[:max_words])
-    return re.sub(r"[,;:]$", "", out) + ("…" if len(words) > max_words else "")
+    return " ".join(words[:max_words]).rstrip(",;:") + "…"
 
 
 def store_scenes(ctx, video_id: str, scenes: list[dict]) -> None:
