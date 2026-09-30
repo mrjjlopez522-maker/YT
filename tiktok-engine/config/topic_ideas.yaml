@@ -1,0 +1,9 @@
+ideas:
+  - topic: "The Mandelbrot set"
+    category: science
+    potential_angle: "One line of arithmetic, an edge that never gets smooth"
+    evergreen: true
+  - topic: "Conway's Game of Life"
+    category: science
+    potential_angle: "A game with no players that can compute"
+    evergreen: true

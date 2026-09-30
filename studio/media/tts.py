@@ -19,6 +19,7 @@ import array
 import base64
 import ctypes
 import ctypes.util
+import os
 import re
 import shutil
 import subprocess
@@ -107,12 +108,23 @@ class EspeakNGProvider(TTSProvider):
     def _load(cls) -> bool:
         if cls._lib is not None:
             return True
-        name = ctypes.util.find_library("espeak-ng") or "libespeak-ng.so.1"
+        # Load the system library by absolute path. Other packages (e.g. kokoro-onnx's phonemizer)
+        # may have loaded a bundled copy with the same soname; a bare-name load would return that
+        # copy, which has its own data location and its own global state.
+        candidates = [os.environ.get("STUDIO_ESPEAK_LIB"), "/usr/lib/x86_64-linux-gnu/libespeak-ng.so.1",
+                      "/usr/lib/aarch64-linux-gnu/libespeak-ng.so.1", "/usr/lib/libespeak-ng.so.1",
+                      "/usr/local/lib/libespeak-ng.so.1", "/opt/homebrew/lib/libespeak-ng.dylib",
+                      "/usr/local/lib/libespeak-ng.dylib"]
+        path = next((c for c in candidates if c and os.path.exists(c)), None) \
+            or ctypes.util.find_library("espeak-ng") or "libespeak-ng.so.1"
         try:
-            lib = ctypes.CDLL(name)
+            lib = ctypes.CDLL(path)
         except OSError:
             return False
-        rate = lib.espeak_Initialize(2, 0, None, 0)  # AUDIO_OUTPUT_SYNCHRONOUS
+        data_parent = os.environ.get("STUDIO_ESPEAK_DATA_PARENT")
+        if not data_parent and os.path.isabs(path) and os.path.isdir(os.path.join(os.path.dirname(path), "espeak-ng-data")):
+            data_parent = os.path.dirname(path)
+        rate = lib.espeak_Initialize(2, 0, data_parent.encode() if data_parent else None, 0)  # AUDIO_OUTPUT_SYNCHRONOUS
         if rate <= 0:
             return False
 

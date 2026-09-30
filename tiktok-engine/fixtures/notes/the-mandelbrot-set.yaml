@@ -1,0 +1,132 @@
+topic: "The Mandelbrot set"
+category: science
+series: visible-math
+suggested_format: unexpected_fact_reveal
+audience: "curious viewers who like maths shown visually; no prior knowledge assumed"
+notes_author: "project fixture (written in our own words)"
+verification_note: >-
+  URLs and references were written from the author's knowledge; they were not fetched in the
+  build environment (network access to them was blocked). Open each before publishing.
+
+sources:
+  - {id: s1, title: "Mandelbrot set (Wikipedia)", url: "https://en.wikipedia.org/wiki/Mandelbrot_set", reliability: tertiary}
+  - {id: s2, title: "Coastline paradox (Wikipedia)", url: "https://en.wikipedia.org/wiki/Coastline_paradox", reliability: tertiary}
+  - {id: s3, title: "Mandelbrot, B. (1967). How Long Is the Coast of Britain? Statistical Self-Similarity and Fractional Dimension. Science 156(3775), 636-638.", url: "https://doi.org/10.1126/science.156.3775.636", reliability: primary}
+  - {id: s4, title: "Shishikura, M. (1998). The Hausdorff dimension of the boundary of the Mandelbrot set and Julia sets. Annals of Mathematics 147(2), 225-267.", url: null, reliability: primary}
+  - {id: s5, title: "Mandelbrot, B. (1982). The Fractal Geometry of Nature. W. H. Freeman.", url: null, reliability: primary}
+  - {id: s6, title: "Benoit Mandelbrot (Wikipedia)", url: "https://en.wikipedia.org/wiki/Benoit_Mandelbrot", reliability: tertiary}
+  - {id: s7, title: "Douady, A. and Hubbard, J. H. (1982). Iteration des polynomes quadratiques complexes. C. R. Acad. Sci. Paris 294, 123-126.", url: null, reliability: primary}
+
+facts:
+  - id: m1
+    text: "Zoom into the edge of this shape as far as you like, and it never turns into a smooth line."
+    sources: [s1]
+    tags: [hook, definition, visual]
+    visual: {generator: mandelbrot_zoom, params: {preset: seahorse}}
+  - id: m2
+    text: "It's the Mandelbrot set, built from one short rule: start at zero, square the number, add a fixed constant, and repeat."
+    sources: [s1]
+    tags: [setup, definition]
+    visual: {generator: equation_card}
+  - id: m3
+    text: "If the numbers stay small forever, that constant belongs to the set. If they run off toward infinity, it doesn't."
+    sources: [s1]
+    tags: [setup, mechanism]
+    requires: [m2]
+    visual: {generator: iteration_chart}
+  - id: m4
+    text: "Every point on the screen is one of those constants, so a single rule paints the whole picture."
+    sources: [s1]
+    tags: [development, mechanism]
+    requires: [m3]
+    visual: {generator: mandelbrot_zoom, params: {preset: overview}}
+  - id: m5
+    text: "Robert Brooks and Peter Matelski published an early drawing of it in 1978."
+    sources: [s1]
+    tags: [development, history, person]
+    date: "1978"
+    visual: {generator: timeline, params: {active: "1978"}}
+  - id: m6
+    text: "Benoit Mandelbrot made the first detailed pictures at IBM in 1980, and the set was later named after him."
+    sources: [s1, s6]
+    tags: [development, history, person]
+    date: "1980"
+    requires: [m2]
+    visual: {generator: timeline, params: {active: "1980"}}
+  - id: m7
+    text: "Years earlier, in 1967, he had asked a strange question in the journal Science: how long is the coast of Britain?"
+    sources: [s3, s2]
+    tags: [development, history, stakes]
+    date: "1967"
+    requires: [m6]
+    question: "How long is the coast of Britain?"
+    visual: {generator: coastline, params: {levels: [0, 1]}}
+  - id: m8
+    text: "The answer depends on your ruler. Shorter rulers follow more bays and bends, so the measured coast keeps getting longer."
+    sources: [s2, s3]
+    tags: [development, mechanism]
+    requires: [m7]
+    visual: {generator: coastline, params: {levels: [1, 2, 3, 4]}}
+  - id: m9
+    text: "In 1975 he coined a word for shapes like this: fractal."
+    sources: [s6]
+    tags: [development, history]
+    date: "1975"
+    requires: [m6]
+    visual: {generator: kinetic_text, params: {text: "FRACTAL", sub: "coined 1975"}}
+  - id: m10
+    text: "In 1982 Adrien Douady and John Hubbard proved the whole set is connected, so even the tiny copies deep in the zoom hang on to the main shape."
+    sources: [s1, s7]
+    tags: [development, significance]
+    date: "1982"
+    requires: [m2]
+    visual: {generator: mandelbrot_zoom, params: {preset: minibrot}}
+  - id: m11
+    text: "And in 1998 Mitsuhiro Shishikura proved that its edge is so crumpled it has dimension two, the same as a flat surface."
+    sources: [s4, s1]
+    tags: [payoff, significance]
+    date: "1998"
+    visual: {generator: space_filling_curve}
+  - id: m12
+    text: "Mandelbrot's point was simple: clouds are not spheres, mountains are not cones, coastlines are not circles."
+    sources: [s5]
+    tags: [payoff, quote]
+    requires: [m6]
+    visual: {generator: kinetic_text, params: {text: "Nature is rough", sub: "Mandelbrot, 1982"}}
+
+hooks:
+  - {type: VISUAL_HOOK, text: "Zoom in forever and this edge never turns smooth."}
+  - {type: UNEXPECTED_FACT, text: "This edge is so crumpled it has the dimension of a surface."}
+  - {type: QUESTION, text: "How long is the coast of Britain?"}
+  - {type: CURIOSITY, text: "Why does one short rule draw something this complicated?"}
+  - {type: STORY, text: "In 1967, Benoit Mandelbrot asked how long Britain's coast is."}
+
+quotes:
+  - text: "Clouds are not spheres, mountains are not cones, coastlines are not circles, and bark is not smooth, nor does lightning travel in a straight line."
+    speaker: "Benoit Mandelbrot"
+    source: s5
+locations:
+  - {name: "IBM Thomas J. Watson Research Center, Yorktown Heights, New York", related_fact: m6, source: s1}
+contradictions:
+  - topic: "Who drew it first?"
+    claim_a: "The set is named after Mandelbrot, who made the first detailed images in 1980."
+    claim_b: "Brooks and Matelski published an early drawing in 1978."
+    resolution: "Both are true: the 1978 drawing came first; Mandelbrot's 1980 images and study made the set famous, and it was later named after him."
+    sources: [s1]
+
+comment_prompts:
+  - "Would you have guessed a coastline has no fixed length?"
+  - "Which surprised you more: the coastline or the dimension?"
+  - "Where else have you seen a shape that repeats as you zoom in?"
+
+timeline:
+  "1967": "coast of Britain question"
+  "1975": "'fractal' coined"
+  "1978": "early drawing"
+  "1980": "first detailed pictures"
+  "1982": "proved connected"
+  "1998": "edge has dimension 2"
+
+caption_ideas:
+  - "An edge so crumpled it has the dimension of a surface"
+  - "The coast of Britain has no fixed length, and that led somewhere strange"

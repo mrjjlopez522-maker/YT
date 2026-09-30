@@ -1,0 +1,26 @@
+# Brand identity: what makes every video recognisably yours.
+channel_name: "Studio Demo"
+handle: "@studiodemo"            # shown on the end card only
+logo:
+  kind: monogram                  # monogram (generated) | file
+  text: "SD"
+  file: ""                        # path to your own logo PNG when kind: file
+font:
+  bold: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+  regular: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+  caption_family: DejaVu Sans
+palette:
+  bg_top: "#0B1020"
+  bg_bottom: "#1B2E4A"
+  accent: "#3CF0B4"
+  highlight: "#FFD23F"
+  text: "#FFFFFF"
+  muted: "#BCC6D6"
+  panel: "#080C18C8"
+caption_style: tiktok_bold
+intro_style: none                 # none | series_tag (a small tag in the first seconds; no slow intros)
+outro_style: question_card        # none | question_card | handle_card
+voice: am_michael
+music_style: ambient_pad          # ambient_pad (original, generated) | none | library
+graphic_style: clean_cards        # rounded dark panels, accent bar, grid motif
+fractal_colormap: viridis        # magma | viridis | cividis | plasma — fractal visuals follow the brand

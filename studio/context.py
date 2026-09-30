@@ -12,12 +12,15 @@ from .textutil import now_iso
 
 
 class StudioContext:
-    def __init__(self, cfg: Config, *, http: HttpClient | None = None, console_logging: bool = True):
+    def __init__(self, cfg: Config, *, http: HttpClient | None = None, console_logging: bool = True,
+                 extra_dirs: tuple[str, ...] = (), db_path: Path | None = None, extra_schema: Path | None = None,
+                 extra_primary_keys: dict | None = None, extra_columns: dict | None = None):
         self.cfg = cfg
-        self.ws = Workspace(cfg.home).ensure()
+        self.ws = Workspace(cfg.home, extra_dirs).ensure()
         setup_logging(self.ws.dir("logs"), cfg.get("logging.level", "INFO"), console=console_logging)
         self.log = get_logger("studio")
-        self.db = Database(self.ws.db_path)
+        self.db = Database(db_path or self.ws.db_path, extra_schema=extra_schema,
+                           extra_primary_keys=extra_primary_keys, extra_columns=extra_columns)
         self.http = http or HttpClient()
         self._ensure_channel()
 

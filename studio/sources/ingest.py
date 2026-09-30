@@ -21,7 +21,7 @@ def ingest(ctx, source_id: str, *, provider=None) -> dict:
     dest_dir = ctx.ws.source_dir(source_id)
     dest_dir.mkdir(parents=True, exist_ok=True)
     origin = src.get("download_url") or src["source_url"]
-    if src["platform"] == "local":
+    if src["platform"] in ("local", "generated"):
         local = Path(src["local_path"] or urlparse(src["source_url"]).path)
         dest = dest_dir / f"original{local.suffix.lower()}"
         if not dest.exists():

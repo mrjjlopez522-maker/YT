@@ -62,8 +62,14 @@ def _decode(row: sqlite3.Row | None) -> dict | None:
 
 
 class Database:
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path, *, extra_schema: str | Path | None = None,
+                 extra_primary_keys: dict[str, str] | None = None,
+                 extra_columns: dict[str, dict[str, str]] | None = None):
+        """extra_* let an application (e.g. the TikTok engine) extend the core schema."""
         self.path = Path(path)
+        self.extra_schema = Path(extra_schema) if extra_schema else None
+        self.primary_keys = {**PRIMARY_KEYS, **(extra_primary_keys or {})}
+        self.extra_columns = extra_columns or {}
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(str(self.path), timeout=30, isolation_level=None)
         self.conn.row_factory = sqlite3.Row
@@ -76,6 +82,13 @@ class Database:
 
     def migrate(self) -> None:
         self.conn.executescript(_SCHEMA_FILE.read_text(encoding="utf-8"))
+        if self.extra_schema:
+            self.conn.executescript(self.extra_schema.read_text(encoding="utf-8"))
+        for table, cols in self.extra_columns.items():
+            existing = self._columns(table)
+            for col, decl in cols.items():
+                if col not in existing:
+                    self.conn.execute(f"ALTER TABLE {_ident(table)} ADD COLUMN {_ident(col)} {decl}")
         cur = self.conn.execute("SELECT MAX(version) FROM schema_version").fetchone()[0]
         if cur is None:
             self.conn.execute("INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
@@ -106,7 +119,7 @@ class Database:
         _ident(table)
         if not changes:
             return
-        pk = PRIMARY_KEYS[table]
+        pk = self.primary_keys[table]
         data = _encode(changes)
         sets = ", ".join(f"{c} = ?" for c in data)
         cur = self.conn.execute(f"UPDATE {table} SET {sets} WHERE {pk} = ?", [*data.values(), key])
@@ -115,7 +128,7 @@ class Database:
 
     def get(self, table: str, key: Any) -> dict | None:
         _ident(table)
-        pk = PRIMARY_KEYS[table]
+        pk = self.primary_keys[table]
         return _decode(self.conn.execute(f"SELECT * FROM {table} WHERE {pk} = ?", (key,)).fetchone())
 
     def require(self, table: str, key: Any) -> dict:
@@ -169,7 +182,7 @@ class Database:
     # -- status + audit ----------------------------------------------------
     def set_status(self, table: str, key: str, new_status: str, *, reason: str | None = None,
                    extra: dict | None = None) -> None:
-        pk = PRIMARY_KEYS[table]
+        pk = self.primary_keys[table]
         current = self.scalar(f"SELECT status FROM {_ident(table)} WHERE {pk} = ?", (key,))
         changes = {"status": new_status, **(extra or {})}
         if "updated_at" in self._columns(table):

@@ -1,0 +1,26 @@
+# Recurring series. Each keeps an identity while every episode stays different.
+series:
+  - series_id: visible-math
+    name: "Visible Math"
+    description: "Mathematics you can watch: the ideas behind shapes, patterns and rules."
+    visual_identity: {accent: "#3CF0B4", tag: "VISIBLE MATH", motif: grid}
+    caption_style: tiktok_bold
+    voice: am_michael
+    intro_style: series_tag
+    outro_style: question_card
+  - series_id: why-this-exists
+    name: "Why This Exists"
+    description: "The story behind everyday objects and rules."
+    visual_identity: {accent: "#FFB347", tag: "WHY THIS EXISTS", motif: none}
+    caption_style: tiktok_bold
+    voice: am_michael
+    intro_style: series_tag
+    outro_style: question_card
+  - series_id: thirty-seconds-history
+    name: "30 Seconds of History"
+    description: "One historical moment, told tightly."
+    visual_identity: {accent: "#FF6B6B", tag: "30s HISTORY", motif: none}
+    caption_style: tiktok_bold
+    voice: bm_george
+    intro_style: series_tag
+    outro_style: none

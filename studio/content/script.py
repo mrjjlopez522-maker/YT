@@ -148,8 +148,14 @@ def score_hook(h: HookCandidate, facts_by_id: dict, style_cfg: dict, recent_hook
 
 
 # -- offline sections --------------------------------------------------------------
+EXPLICIT_SECTION = {"setup": "SETUP", "context": "SETUP", "development": "DEVELOPMENT", "payoff": "PAYOFF"}
+
+
 def _section_for(f: dict) -> str | None:
     tags = set(f.get("tags", []))
+    explicit = [EXPLICIT_SECTION[t] for t in ("payoff", "setup", "context", "development") if t in tags]
+    if explicit:  # a researcher's explicit placement beats inference from topical tags
+        return explicit[0]
     for name in ("PAYOFF", "SETUP", "DEVELOPMENT"):
         if tags & SECTION_TAGS[name]:
             return name
@@ -251,6 +257,24 @@ def offline_sections(facts: list[dict], hook: HookCandidate, budget: int, includ
                     changed = True
     for name in buckets:  # keep the order the researcher wrote
         buckets[name].sort(key=lambda f: (f.get("position", 0), str(f.get("fact_date") or "")))
+    # a prerequisite must be told before the fact that relies on it
+    order = ["SETUP", "DEVELOPMENT", "PAYOFF"]
+    moved = True
+    while moved:
+        moved = False
+        where = {f["fact_id"]: name for name in order for f in buckets[name]}
+        for name in order:
+            for f in list(buckets[name]):
+                for req in requires.get(f["fact_id"], ()):
+                    if req in where and order.index(where[req]) > order.index(name):
+                        fact = next(x for x in buckets[where[req]] if x["fact_id"] == req)
+                        if len(buckets[where[req]]) > 1:
+                            buckets[where[req]].remove(fact)
+                            buckets[name].append(fact)
+                            moved = True
+        if moved:
+            for name in buckets:
+                buckets[name].sort(key=lambda f: (f.get("position", 0), str(f.get("fact_date") or "")))
     sections = [{"name": "HOOK", "sentences": [{"text": hook.text, "fact_ids": hook.fact_ids}]}]
     for name in ("SETUP", "DEVELOPMENT", "PAYOFF"):
         if buckets[name]:

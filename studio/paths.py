@@ -27,18 +27,19 @@ def is_valid_base_name(name: str) -> bool:
 
 
 class Workspace:
-    def __init__(self, home: Path):
+    def __init__(self, home: Path, extra_dirs: tuple[str, ...] = ()):
         self.home = Path(home)
+        self.dirs = tuple(DATA_DIRS) + tuple(d for d in extra_dirs if d not in DATA_DIRS)
 
     def ensure(self) -> "Workspace":
-        for d in DATA_DIRS:
+        for d in self.dirs:
             (self.home / d).mkdir(parents=True, exist_ok=True)
         (self.home / "sources" / "library").mkdir(parents=True, exist_ok=True)
         (self.home / "research" / "notes").mkdir(parents=True, exist_ok=True)
         return self
 
     def dir(self, name: str) -> Path:
-        if name not in DATA_DIRS:
+        if name not in self.dirs:
             raise ValueError(f"unknown workspace dir {name}")
         return self.home / name
 

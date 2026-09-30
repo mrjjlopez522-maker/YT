@@ -1,0 +1,21 @@
+# Unit prices for cost ESTIMATES. Your inputs; verify each provider's pricing page.
+# A paid provider with price null is refused (budget cannot be enforced) unless allow_unpriced: true.
+allow_unpriced: false
+llm:
+  offline: {input_per_mtok: 0.0, output_per_mtok: 0.0}
+  anthropic: {input_per_mtok: 4.00, output_per_mtok: 20.00}   # claude-opus-5-5 list price, 2026-09
+tts:
+  kokoro: {per_1k_chars: 0.0}      # local model
+  espeak: {per_1k_chars: 0.0}
+  elevenlabs: {per_1k_chars: null}
+research:
+  local_notes: {per_request: 0.0}
+  wikipedia: {per_request: 0.0}
+sources:
+  local_library: {per_request: 0.0}
+  generated: {per_request: 0.0}
+storage:
+  per_gb_month: 0.0
+rendering:
+  per_render_minute: 0.0           # set if you rent render machines
+other: {}

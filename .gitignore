@@ -37,3 +37,23 @@ logs/*
 *.swp
 .idea/
 .vscode/
+
+# TikTok engine: models and generated workspace data
+tiktok-engine/models/
+tiktok-engine/database/*
+tiktok-engine/research/*
+tiktok-engine/trends/*
+tiktok-engine/sources/*
+tiktok-engine/licenses/*
+tiktok-engine/scripts/*
+tiktok-engine/audio/*
+tiktok-engine/visuals/*
+tiktok-engine/storyboards/*
+tiktok-engine/captions/*
+tiktok-engine/projects/*
+tiktok-engine/renders/*
+tiktok-engine/exports/*
+tiktok-engine/thumbnails/*
+tiktok-engine/analytics/*
+tiktok-engine/logs/*
+!tiktok-engine/*/.gitkeep

@@ -1,0 +1,125 @@
+# Reusable format templates (trend format analysis output).
+# Every "why_it_works" is an editorial hypothesis — evidence_label ASSUMPTION —
+# until our own analytics or your recorded observations support it.
+# Slot boundaries are fractions of the video length; `section` maps to script sections.
+formats:
+  - format_id: unexpected_fact_reveal
+    name: "Unexpected fact → reveal"
+    content_format: MINI_DOCUMENTARY
+    hook_style: UNEXPECTED_FACT
+    target_length: 65
+    cut_frequency: 1.6
+    text_density: low
+    narration_style: calm, precise documentary voice
+    visual_style: one striking visual per beat; original graphics for explanation
+    story_structure:
+      - {slot: hook, section: HOOK, start: 0.00, end: 0.06, purpose: "an unexpected, true statement tied to the first visual"}
+      - {slot: context, section: CONTEXT, start: 0.06, end: 0.25, purpose: "what the thing is, in plain words"}
+      - {slot: story, section: DEVELOPMENT, start: 0.25, end: 0.72, purpose: "how it came to be; each beat opens the next question"}
+      - {slot: reveal, section: PAYOFF, start: 0.72, end: 0.94, purpose: "the answer the hook promised"}
+      - {slot: question, section: CTA, start: 0.94, end: 1.00, purpose: "optional, genuinely open question"}
+    comment_prompt_style: reflective question about the reveal
+    payoff_type: reveal_answers_hook
+    cta_style: none_or_question
+    why_it_works: "The hook creates a specific knowledge gap; each beat narrows it; the payoff closes exactly that gap, so the promise is kept."
+    evidence_label: ASSUMPTION
+
+  - format_id: myth_vs_fact
+    name: "Myth vs fact"
+    content_format: MYTH_VS_FACT
+    hook_style: CONTRADICTION
+    target_length: 45
+    cut_frequency: 1.8
+    text_density: medium
+    narration_style: direct, even-handed
+    visual_style: labelled MYTH / FACT cards over evidence visuals
+    story_structure:
+      - {slot: myth, section: HOOK, start: 0.00, end: 0.08, purpose: "state the common belief fairly"}
+      - {slot: why_believed, section: CONTEXT, start: 0.08, end: 0.30, purpose: "why people believe it"}
+      - {slot: evidence, section: DEVELOPMENT, start: 0.30, end: 0.80, purpose: "what the sources actually show"}
+      - {slot: fact, section: PAYOFF, start: 0.80, end: 1.00, purpose: "the corrected picture, with nuance"}
+    comment_prompt_style: "which belief did you grow up with?"
+    payoff_type: correction
+    cta_style: none
+    why_it_works: "Contradiction of a familiar belief is a clear premise; evidence-led correction delivers it without fake controversy."
+    evidence_label: ASSUMPTION
+
+  - format_id: timeline
+    name: "Timeline"
+    content_format: TIMELINE
+    hook_style: STATEMENT
+    target_length: 60
+    cut_frequency: 1.5
+    text_density: medium
+    narration_style: brisk chronological
+    visual_style: animated timeline with a year marker per beat
+    story_structure:
+      - {slot: hook, section: HOOK, start: 0.00, end: 0.07, purpose: "where the story ends up, stated plainly"}
+      - {slot: start, section: CONTEXT, start: 0.07, end: 0.25, purpose: "the starting point"}
+      - {slot: beats, section: DEVELOPMENT, start: 0.25, end: 0.80, purpose: "dated turning points"}
+      - {slot: now, section: PAYOFF, start: 0.80, end: 1.00, purpose: "why it matters today"}
+    comment_prompt_style: "which date surprised you?"
+    payoff_type: significance
+    cta_style: none
+    why_it_works: "Dates give a visible sense of progress, which acts like a progress bar for the story."
+    evidence_label: ASSUMPTION
+
+  - format_id: why_this_exists
+    name: "Why this exists"
+    content_format: EXPLAINER
+    hook_style: QUESTION
+    target_length: 65
+    cut_frequency: 1.6
+    text_density: low
+    narration_style: curious, explanatory
+    visual_style: the object, then diagrams of the problem it solves
+    story_structure:
+      - {slot: question, section: HOOK, start: 0.00, end: 0.06, purpose: "why does this thing look/work this way?"}
+      - {slot: problem, section: CONTEXT, start: 0.06, end: 0.30, purpose: "the problem people had"}
+      - {slot: attempts, section: DEVELOPMENT, start: 0.30, end: 0.78, purpose: "how solutions evolved"}
+      - {slot: answer, section: PAYOFF, start: 0.78, end: 1.00, purpose: "the design choice explained"}
+    comment_prompt_style: "what else looks strange but has a reason?"
+    payoff_type: explanation
+    cta_style: none
+    why_it_works: "A concrete question about a familiar object is easy to care about; the answer is useful after the video ends."
+    evidence_label: ASSUMPTION
+
+  - format_id: three_things
+    name: "Three things about …"
+    content_format: LIST_FORMAT
+    hook_style: CURIOSITY
+    target_length: 45
+    cut_frequency: 2.0
+    text_density: medium
+    narration_style: tight, numbered
+    visual_style: numbered cards, one visual per item
+    story_structure:
+      - {slot: hook, section: HOOK, start: 0.00, end: 0.07, purpose: "why these three matter"}
+      - {slot: item1, section: CONTEXT, start: 0.07, end: 0.35, purpose: "first item"}
+      - {slot: item2, section: DEVELOPMENT, start: 0.35, end: 0.65, purpose: "second item"}
+      - {slot: item3, section: PAYOFF, start: 0.65, end: 1.00, purpose: "strongest item last"}
+    comment_prompt_style: "which one did you know?"
+    payoff_type: strongest_last
+    cta_style: none
+    why_it_works: "Numbered structure sets expectations; saving the strongest item for last supports completion."
+    evidence_label: ASSUMPTION
+
+  - format_id: quick_lesson
+    name: "Quick lesson"
+    content_format: QUICK_LESSON
+    hook_style: STATEMENT
+    target_length: 30
+    cut_frequency: 1.8
+    text_density: medium
+    narration_style: teacherly, concise
+    visual_style: diagram builds step by step
+    story_structure:
+      - {slot: promise, section: HOOK, start: 0.00, end: 0.10, purpose: "what you'll understand in 30 s"}
+      - {slot: setup, section: CONTEXT, start: 0.10, end: 0.35, purpose: "the one concept needed"}
+      - {slot: steps, section: DEVELOPMENT, start: 0.35, end: 0.80, purpose: "the steps"}
+      - {slot: takeaway, section: PAYOFF, start: 0.80, end: 1.00, purpose: "the takeaway"}
+    comment_prompt_style: "what should the next lesson be?"
+    payoff_type: takeaway
+    cta_style: none
+    why_it_works: "A small, clearly bounded promise that is fully delivered."
+    evidence_label: ASSUMPTION

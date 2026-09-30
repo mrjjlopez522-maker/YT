@@ -60,6 +60,9 @@ def overlay_images(scene: dict, work: Path, size: tuple[int, int]) -> list[tuple
             img = graphics.attribution(g["text"], size)
         elif kind == "arrow":
             img = graphics.arrow(tuple(g["start_xy"]), tuple(g["end_xy"]), size)
+        elif kind == "image":  # a pre-rendered full-frame RGBA overlay (e.g. brand cards)
+            from PIL import Image
+            img = Image.open(g["path"]).convert("RGBA").resize(size)
         else:
             raise RenderError(f"Unknown graphic type {kind!r}")
         path = graphics.save(img, work / f"scene{scene['idx']:02d}_g{k}_{kind}.png")

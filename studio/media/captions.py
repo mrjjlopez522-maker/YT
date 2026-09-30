@@ -92,7 +92,10 @@ def _esc(text: str) -> str:
     return text.replace("\\", "\\\\").replace("{", "(").replace("}", ")").replace("\n", " ")
 
 
-def to_ass(chunks: list[Chunk], style: dict, resolution: tuple[int, int]) -> str:
+def to_ass(chunks: list[Chunk], style: dict, resolution: tuple[int, int],
+           emphasis_words: set[str] | None = None) -> str:
+    """word_highlight: karaoke-style active word. emphasis: 'keywords' colours only the given
+    important words (numbers, names, key terms), at most one per chunk."""
     w, h = resolution
     upper = bool(style.get("uppercase"))
     box = bool(style.get("box"))
@@ -114,9 +117,14 @@ def to_ass(chunks: list[Chunk], style: dict, resolution: tuple[int, int]) -> str
         f"{style.get('margin_lr', 100)},{style.get('margin_v', 600)},1",
         "", "[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
     ]
+    emph = {w.lower() for w in (emphasis_words or set())}
     for c in chunks:
         ws = [x["word"].upper() if upper else x["word"] for x in c.words]
-        if style.get("word_highlight") and len(ws) > 1:
+        if style.get("emphasis") == "keywords":
+            hit = next((j for j, x in enumerate(c.words) if re.sub(r"[^\w']", "", x["word"]).lower() in emph), None)
+            text = " ".join(("{\\c" + hl + "}" + _esc(t) + "{\\r}") if j == hit else _esc(t) for j, t in enumerate(ws))
+            lines.append(f"Dialogue: 0,{_ts(c.start)},{_ts(c.end)},Caption,,0,0,0,,{text}")
+        elif style.get("word_highlight") and len(ws) > 1:
             for i, word in enumerate(c.words):
                 start = c.start if i == 0 else word["start"]
                 end = c.words[i + 1]["start"] if i + 1 < len(c.words) else c.end

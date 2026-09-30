@@ -34,7 +34,8 @@ VALID_FREQUENCIES = {"daily", "weekdays", "3_per_week", "weekly"}
 
 SECRET_ENV_NAMES = (
     "YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_API_KEY",
-    "ANTHROPIC_API_KEY", "TTS_API_KEY", "OTHER_API_KEY",
+    "ANTHROPIC_API_KEY", "TTS_API_KEY", "OTHER_API_KEY", "TIKTOK_CLIENT_SECRET", "TIKTOK_CLIENT_KEY",
+    "RESEARCH_API_KEY",
 )
 
 _FALSE = {"0", "false", "no", "off"}
@@ -79,9 +80,11 @@ def _env_flag(name: str):
 
 
 class Config:
-    def __init__(self, data: dict, home: Path):
+    def __init__(self, data: dict, home: Path, search_roots: tuple[Path, ...] | None = None):
         self.data = data
         self.home = Path(home)
+        # where relative config files are looked up, in order (applications may prepend their own root)
+        self.search_roots = tuple(search_roots) if search_roots else (self.home, REPO_ROOT)
 
     # -- generic access -------------------------------------------------
     def get(self, dotted: str, default=_MISSING):
@@ -104,7 +107,7 @@ class Config:
         p = Path(rel)
         if p.is_absolute():
             return p
-        for base in (self.home, REPO_ROOT):
+        for base in self.search_roots:
             if (base / p).exists():
                 return base / p
         return self.home / p
@@ -196,7 +199,8 @@ def validate(cfg: Config) -> None:
 
 
 def load_config(home: str | os.PathLike | None = None, *, config_path: str | os.PathLike | None = None,
-                overrides: dict | None = None, load_env: bool = True) -> Config:
+                overrides: dict | None = None, load_env: bool = True, validator=None,
+                search_roots: tuple[Path, ...] | None = None) -> Config:
     home_path = Path(home or os.environ.get("STUDIO_HOME") or REPO_ROOT).resolve()
     if load_env:
         load_dotenv(home_path / ".env")
@@ -207,6 +211,7 @@ def load_config(home: str | os.PathLike | None = None, *, config_path: str | os.
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except yaml.YAMLError as exc:
         raise ConfigError(f"Could not parse {path}: {exc}") from exc
-    cfg = Config(_deep_merge(data, overrides or {}), home_path)
-    validate(cfg)
+    cfg = Config(_deep_merge(data, overrides or {}), home_path,
+                 search_roots=(home_path, *search_roots) if search_roots else None)
+    (validator or validate)(cfg)
     return cfg

@@ -1,0 +1,59 @@
+# TikTok caption styles. The TikTok UI covers the bottom ~25% (caption, sound,
+# username) and a right-hand column (~120 px of 1080) with buttons, plus a
+# top strip with Following/For You. Captions sit in the lower-middle band.
+tiktok_bold:
+  font: DejaVu Sans
+  font_file: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+  font_size: 80
+  bold: true
+  primary_color: "#FFFFFF"
+  highlight_color: "#FFD23F"
+  outline_color: "#000000"
+  outline_width: 6
+  shadow: 2
+  margin_v: 660
+  margin_lr: 130
+  max_words_per_chunk: 3
+  max_chars_per_chunk: 18
+  min_chunk_seconds: 0.35
+  uppercase: false
+  word_highlight: true
+  emphasis: keywords          # highlight only numbers/names/key terms, not every word
+
+tiktok_clean:
+  font: Liberation Sans
+  font_file: /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf
+  font_size: 70
+  bold: true
+  primary_color: "#FFFFFF"
+  highlight_color: "#3CF0B4"
+  outline_color: "#101010"
+  outline_width: 5
+  shadow: 0
+  margin_v: 620
+  margin_lr: 140
+  max_words_per_chunk: 4
+  max_chars_per_chunk: 24
+  min_chunk_seconds: 0.4
+  uppercase: false
+  word_highlight: false
+
+tiktok_boxed:
+  font: DejaVu Sans
+  font_file: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+  font_size: 72
+  bold: true
+  primary_color: "#FFFFFF"
+  highlight_color: "#FF6B6B"
+  outline_color: "#000000"
+  outline_width: 0
+  box: true
+  box_color: "#000000B0"
+  shadow: 0
+  margin_v: 680
+  margin_lr: 130
+  max_words_per_chunk: 3
+  max_chars_per_chunk: 16
+  min_chunk_seconds: 0.35
+  uppercase: true
+  word_highlight: true

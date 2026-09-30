@@ -1,0 +1,25 @@
+# Trends YOU observed (e.g. while browsing TikTok's Creative Center or your For You feed).
+# This is how platform trends enter the engine without scraping. Record what you saw,
+# where, and when; the engine never invents a signal you did not record.
+observations:
+  - topic: "Fractals and infinite zooms"
+    category: science
+    observed_at: 2026-09-29
+    where: "manual note: several math zoom videos in my feed this week"
+    trend_type: format
+    signal: null            # put a number only if you measured one (e.g. hashtag views from Creative Center)
+    growth: null
+    content_volume: null
+    potential_angle: "What the zoom actually shows, and why its edge never gets smooth"
+    expires: 2026-10-20
+    format:                 # optional: describe the format you saw, for format analysis
+      hook_style: VISUAL_HOOK
+      video_length: 40
+      cut_frequency: 0.8
+      text_density: low
+      narration_style: none (music only)
+      visual_style: continuous zoom
+      story_structure: "zoom, no explanation"
+      payoff_type: none
+      cta_style: "follow for part 2"
+      notes: "Popular, but explains nothing — room for an original explainer."

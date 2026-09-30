@@ -16,6 +16,11 @@ What it will not do:
 - Every video needs a person's approval before upload. Public release needs explicit permission.
 - `DRY_RUN=true` and `AUTO_PUBLISH=false` are the defaults, and they are enforced in code.
 
+**TikTok Engine:** a TikTok-first application built on this core library lives in
+[tiktok-engine/](tiktok-engine/README.md). It adds trends, format templates,
+idea batches, original procedural visuals, a natural local voice, TikTok QC,
+and a dry-run Content Posting API client.
+
 For the design, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). For YouTube
 Partner Program facts and what they mean for the business, see
 [docs/BUSINESS_RESEARCH.md](docs/BUSINESS_RESEARCH.md).
