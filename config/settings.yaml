@@ -1,0 +1,113 @@
+# Shorts Studio configuration. Secrets never go here — use .env.
+# Safety-critical defaults (dry_run, auto_publish, manual_approval) are also
+# enforced in code; see studio/config.py.
+
+channel:
+  id: main                      # internal channel key (multi-channel ready)
+  name: "My Shorts Channel"
+  niche: science                # NICHE — choose after reading the niche report
+  language: en                  # LANGUAGE (BCP-47)
+
+production:
+  target_duration: 45           # TARGET_DURATION seconds: 15 | 20 | 30 | 45 | 60
+  duration_tolerance: 0.25      # ±25% of target is accepted by QC
+  max_duration: 60              # hard ceiling for a Short in this system
+  video_resolution: [1080, 1920]  # VIDEO_RESOLUTION (width, height) — must be 9:16
+  fps: 30                       # 30 or 60
+  posting_frequency: daily      # POSTING_FREQUENCY: daily | weekdays | 3_per_week | weekly
+  max_daily_videos: 2           # MAX_DAILY_VIDEOS — quality over quantity
+  allow_graphics_only: true     # if no licensed footage is found, build from original graphics
+  x264_preset: medium
+  x264_crf: 19
+  video_maxrate: 12M            # within YouTube's recommended range for 1080p
+  audio_bitrate: 192k
+
+voice:                          # VOICE
+  provider: espeak              # espeak (local, robotic, dev/test) | elevenlabs (needs TTS_API_KEY)
+  voice_name: en-us
+  words_per_minute: 165         # speed
+  pitch: 50                     # espeak 0-100
+  sentence_pause_ms: 280
+  section_pause_ms: 450
+  hook_pitch_delta: 6           # mild emphasis on the hook
+  pronunciation_file: config/pronunciations.yaml
+
+captions:
+  style: bold_center            # CAPTION_STYLE — key in config/caption_styles.yaml
+  styles_file: config/caption_styles.yaml
+
+music:
+  policy: none                  # MUSIC_POLICY: none | licensed_library_only
+  library_dir: sources/music    # tracks need an approved rights record
+  duck_db: 14                   # how far music ducks under narration
+
+sfx:
+  enabled: false                # sound effects only when they serve the story
+  library_dir: sources/sfx
+
+audio:
+  target_lufs: -14.0
+  true_peak_db: -1.5
+  loudness_tolerance_lu: 2.0
+
+source_policy:                  # SOURCE_POLICY
+  allowed_licenses: [PD, PD-USGov, CC0-1.0, CC-BY-4.0, CC-BY-3.0, CC-BY-2.5, CC-BY-2.0, STOCK-LICENSED, USER-OWNED, WRITTEN-PERMISSION]
+  allow_share_alike: false      # BY-SA would force the Short itself to be BY-SA
+  min_rights_confidence: 0.85
+  use_source_audio: false       # mute embedded source audio unless explicitly allowed
+  max_continuous_source_seconds: 6.0
+  max_source_screen_ratio: 0.85
+  providers: [local_library, wikimedia_commons, nasa_images, internet_archive]
+  max_results_per_provider: 8
+
+research:
+  providers: [local_notes, wikipedia]
+  notes_dir: research/notes
+  min_facts: 4
+
+trends:
+  providers: [manual, wikipedia_pageviews, rss]
+  rss_feeds: []                 # add feeds you are permitted to read
+  manual_file: config/topic_ideas.yaml
+  wikipedia_project: en.wikipedia
+  youtube_region: US
+
+content:
+  llm_provider: offline         # offline | anthropic
+  anthropic_model: claude-opus-5-5
+  include_cta: false            # OPTIONAL CTA — off unless it adds value
+  max_ngram_overlap: 7          # longest shared word run allowed with any research/source text
+  style_file: config/style.yaml
+
+factcheck:
+  min_sources_for_verified: 1
+  allow_needs_review_claims: false
+  drop_unverified_claims: true
+
+qc:
+  similarity_threshold: 0.80    # duplicate/repetition flag
+  max_silence_seconds: 1.2
+  max_black_seconds: 0.4
+  min_narration_coverage: 0.85
+  max_hook_seconds: 4.0
+
+publishing:
+  manual_approval: true         # MANUAL_APPROVAL — default true
+  auto_upload: false            # AUTO_UPLOAD — default false
+  auto_publish: false           # AUTO_PUBLISH — env AUTO_PUBLISH also respected
+  dry_run: true                 # DRY_RUN — env DRY_RUN also respected
+  default_privacy: private      # private | unlisted (public only with explicit approval)
+  category_id: "27"             # YouTube category 27 = Education
+  made_for_kids: false
+  contains_synthetic_media: false  # set true if narration/visuals could be mistaken for real people/events
+  playlist_id: ""
+
+costs:
+  max_api_cost_per_video: 1.00  # MAX_API_COST in USD — pipeline stops before exceeding
+  pricing_file: config/pricing.yaml
+
+experiments:
+  min_sample_size_per_variant: 10
+
+logging:
+  level: INFO

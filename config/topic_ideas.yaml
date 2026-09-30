@@ -1,0 +1,7 @@
+# Manual topic ideas (a legitimate trend input: your own editorial judgement).
+# Each becomes a topic with trend_signal = null (no measured signal).
+ideas:
+  - topic: "Conway's Game of Life"
+    category: science
+    potential_angle: "How four simple rules produce patterns that move, copy, and compute"
+    evergreen: true

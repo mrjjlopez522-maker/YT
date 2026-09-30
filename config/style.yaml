@@ -1,0 +1,77 @@
+# Anti-"AI slop" style rules used by studio/content/style.py and hook scoring.
+# Matching is case-insensitive.
+
+banned_openings:
+  - did you know
+  - you won't believe
+  - you will not believe
+  - here's something crazy
+  - imagine this
+  - in today's video
+  - welcome back
+  - let's dive in
+  - buckle up
+  - have you ever wondered
+  - what if i told you
+  - get ready to
+  - stop scrolling
+
+banned_phrases:
+  - mind-blowing
+  - mind blowing
+  - game-changer
+  - game changer
+  - delve
+  - tapestry
+  - a testament to
+  - in a world where
+  - stay tuned
+  - smash that like
+  - like and subscribe
+  - you won't believe
+  - shocking truth
+  - nobody is talking about
+  - the internet is losing its mind
+  - it's not just
+  - unlock the secrets
+  - little-known fact
+
+hype_words:        # allowed occasionally; flagged when overused
+  - incredible
+  - insane
+  - crazy
+  - unbelievable
+  - shocking
+  - amazing
+  - epic
+  - literally
+  - wild
+  - jaw-dropping
+
+clickbait_title_terms:
+  - you won't believe
+  - shocking
+  - gone wrong
+  - exposed
+  - "100%"
+  - must see
+  - insane
+  - destroyed
+
+absolute_terms:    # must be backed by a verified fact if used
+  - always
+  - never
+  - the only
+  - the first
+  - the biggest
+  - the largest
+  - everyone
+  - no one
+
+limits:
+  max_hype_words_per_script: 1
+  max_exclamations_per_script: 1
+  max_emojis_per_script: 0
+  max_avg_sentence_words: 18
+  max_same_opening_word_ratio: 0.34
+  recent_scripts_window: 30      # compare openings against this many past scripts

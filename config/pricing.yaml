@@ -1,0 +1,33 @@
+# Unit prices used for cost ESTIMATES. These are inputs you maintain; the
+# studio does not look prices up. Check each provider's current pricing page.
+#
+# A paid provider whose price is `null` cannot be budget-checked, so the
+# pipeline refuses to call it (set a price, or set allow_unpriced: true).
+allow_unpriced: false
+
+llm:
+  offline: {input_per_mtok: 0.0, output_per_mtok: 0.0}
+  # Anthropic prices per million tokens (USD). Verify at https://www.anthropic.com/pricing
+  anthropic: {input_per_mtok: null, output_per_mtok: null}
+
+tts:
+  espeak: {per_1k_chars: 0.0}
+  elevenlabs: {per_1k_chars: null}   # depends on your plan
+
+research:
+  local_notes: {per_request: 0.0}
+  wikipedia: {per_request: 0.0}      # free, but be polite (rate limited client)
+
+sources:
+  local_library: {per_request: 0.0}
+  wikimedia_commons: {per_request: 0.0}
+  internet_archive: {per_request: 0.0}
+  nasa_images: {per_request: 0.0}
+
+storage:
+  per_gb_month: 0.0                  # local disk; set your cloud storage price if used
+
+rendering:
+  per_render_minute: 0.0             # local CPU; set a cloud worker price if used
+
+other: {}

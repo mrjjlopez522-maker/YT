@@ -1,0 +1,39 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+secrets/
+*client_secret*.json
+*token*.json
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Generated workspace data (keep the folders, not the contents)
+database/*
+research/*
+sources/*
+licenses/*
+scripts/*
+audio/*
+visuals/*
+captions/*
+projects/*
+renders/*
+thumbnails/*
+exports/*
+analytics/*
+logs/*
+!*/.gitkeep
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/

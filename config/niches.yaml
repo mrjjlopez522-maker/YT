@@ -1,0 +1,59 @@
+# Niche Research Engine inputs.
+#
+# seeds: search terms used for measured factors (Wikipedia pageviews / search
+#        hit counts, Commons and NASA media counts, legal-source pass rates,
+#        YouTube search counts). Measured values are labelled FACT or ESTIMATE
+#        in the report, each with its method and date.
+# priors: factors that cannot be measured from public APIs. These are
+#        ASSUMPTIONS (1 = low, 5 = high) — starting values chosen by the
+#        developer, NOT data. Replace them with your own judgement; the report
+#        always labels them ASSUMPTION.
+niches:
+  history:
+    seeds: [World War II, Roman Empire, Industrial Revolution, Ancient Egypt]
+    priors: {sponsorship_potential: 3, fact_checking_difficulty: 3, originality_potential: 4, production_difficulty: 3}
+  science:
+    seeds: [Physics, Chemistry, Cellular automaton, Periodic table]
+    priors: {sponsorship_potential: 3, fact_checking_difficulty: 3, originality_potential: 4, production_difficulty: 3}
+  technology:
+    seeds: [Transistor, Internet, Artificial intelligence, Semiconductor]
+    priors: {sponsorship_potential: 5, fact_checking_difficulty: 3, originality_potential: 3, production_difficulty: 2}
+  business:
+    seeds: [Stock market, Supply chain, Inflation, Startup company]
+    priors: {sponsorship_potential: 5, fact_checking_difficulty: 4, originality_potential: 3, production_difficulty: 2}
+  psychology:
+    seeds: [Cognitive bias, Memory, Sleep, Habit]
+    priors: {sponsorship_potential: 3, fact_checking_difficulty: 5, originality_potential: 3, production_difficulty: 3}
+  geography:
+    seeds: [River, Mountain, Border, Island]
+    priors: {sponsorship_potential: 2, fact_checking_difficulty: 2, originality_potential: 4, production_difficulty: 3}
+  weird_facts:
+    seeds: [List of common misconceptions, Oddities, Curiosity]
+    priors: {sponsorship_potential: 2, fact_checking_difficulty: 4, originality_potential: 2, production_difficulty: 2}
+  mysteries:
+    seeds: [Unsolved problems, Voynich manuscript, Bermuda Triangle]
+    priors: {sponsorship_potential: 2, fact_checking_difficulty: 5, originality_potential: 3, production_difficulty: 3}
+  engineering:
+    seeds: [Bridge, Dam, Skyscraper, Tunnel]
+    priors: {sponsorship_potential: 4, fact_checking_difficulty: 3, originality_potential: 4, production_difficulty: 3}
+  space:
+    seeds: [Apollo program, Mars, Black hole, International Space Station]
+    priors: {sponsorship_potential: 3, fact_checking_difficulty: 3, originality_potential: 4, production_difficulty: 2}
+  animals:
+    seeds: [Octopus, Migration, Evolution, Predator]
+    priors: {sponsorship_potential: 2, fact_checking_difficulty: 3, originality_potential: 3, production_difficulty: 3}
+  sports_history:
+    seeds: [Olympic Games, FIFA World Cup, Marathon, Baseball]
+    priors: {sponsorship_potential: 4, fact_checking_difficulty: 3, originality_potential: 3, production_difficulty: 4}
+  internet_culture:
+    seeds: [Internet meme, Viral video, Emoji, Social media]
+    priors: {sponsorship_potential: 4, fact_checking_difficulty: 4, originality_potential: 3, production_difficulty: 4}
+  interesting_events:
+    seeds: [Great Molasses Flood, Tunguska event, Year Without a Summer]
+    priors: {sponsorship_potential: 2, fact_checking_difficulty: 3, originality_potential: 4, production_difficulty: 3}
+  documentaries:
+    seeds: [Documentary film, Newsreel, Nature documentary]
+    priors: {sponsorship_potential: 3, fact_checking_difficulty: 3, originality_potential: 3, production_difficulty: 4}
+  human_behavior:
+    seeds: [Social norm, Decision-making, Crowd psychology, Body language]
+    priors: {sponsorship_potential: 3, fact_checking_difficulty: 5, originality_potential: 3, production_difficulty: 3}
