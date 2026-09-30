@@ -24,24 +24,40 @@ def _clean(t: str) -> str:
 
 
 def title_score(title: str, script_text: str, topic: str, past_titles: list[str], style_cfg: dict) -> tuple[float, dict]:
-    script_words = set(norm_words(script_text)) | set(norm_words(topic))
+    from .factcheck import stems
+    known = stems(script_text) | stems(topic)
     key = [w for w in content_words(title) if len(w) > 3]
-    accuracy = sum(1 for w in key if w in script_words) / len(key) if key else 0.0
+    from .factcheck import stem
+    accuracy = sum(1 for w in key if stem(w) in known) / len(key) if key else 0.0
     n = len(title)
+    words = set(norm_words(title))
     crit = {
-        "length": 1.0 if 25 <= n <= 60 else 0.6 if n <= MAX_TITLE else 0.0,
+        "length": 1.0 if 25 <= n <= 55 else 0.6 if n <= MAX_TITLE else 0.0,
         "accuracy": round(accuracy, 3),
         "topic_named": 1.0 if set(content_words(topic)) & set(content_words(title)) else 0.4,
         "novelty": round(1 - max([text_similarity(title, p) for p in past_titles] or [0.0]), 3),
-        "clean": 0.0 if style_mod.title_issues(title, style_cfg) else 1.0,
+        "self_contained": 0.0 if words & {"this", "these", "that", "here"} else 1.0,
+        "clean": 0.0 if style_mod.title_issues(title, style_cfg) or title.endswith(("…", "...")) else 1.0,
     }
     score = 0.0 if crit["clean"] == 0 or crit["accuracy"] < 0.6 or crit["length"] == 0 else \
-        round(crit["length"] + 2 * crit["accuracy"] + crit["topic_named"] + crit["novelty"], 3)
+        round(crit["length"] + 2 * crit["accuracy"] + crit["topic_named"] + crit["novelty"] + crit["self_contained"], 3)
     return score, crit
 
 
+def _clause(text: str, max_len: int) -> str:
+    """First complete clause of a sentence if it fits; never a mid-clause cut."""
+    first = split_sentences(text)[0] if text else ""
+    clause = re.split(r"[,;:—]", first)[0].strip().rstrip(".")
+    return clause if 0 < len(clause) <= max_len else ""
+
+
+LOW_INFO = frozenset("""every first once actually entirely really still later often never always anyone
+something someone thing things another across around within without their there where which while""".split())
+
+
 def keywords(script_text: str, topic: str, facts_text: str, n: int = 10) -> list[str]:
-    words = [w for w in content_words(script_text + " " + facts_text) if len(w) > 3 and not w.isdigit()]
+    words = [w for w in content_words(script_text + " " + facts_text)
+             if len(w) > 3 and not w.isdigit() and w not in LOW_INFO]
     counts = Counter(words)
     toks = norm_words(script_text)
     bigrams = Counter(f"{a} {b}" for a, b in zip(toks, toks[1:])
@@ -50,16 +66,16 @@ def keywords(script_text: str, topic: str, facts_text: str, n: int = 10) -> list
     for bg, c in bigrams.most_common(10):
         if c >= 2 and bg not in out:
             out.append(bg)
-    for w, _ in counts.most_common(40):
+    for w, _ in counts.most_common(60):
         if len(out) >= n:
             break
-        if w not in out and not any(w in o.split() for o in out[:1]):
+        if w not in out and not any(w in o.split() for o in out):
             out.append(w)
     return out[:n]
 
 
 def _hashtag(text: str) -> str:
-    parts = re.findall(r"[A-Za-z0-9]+", text)
+    parts = re.findall(r"[A-Za-z0-9]+", re.sub(r"['’]", "", text))
     return "#" + "".join(p[:1].upper() + p[1:] for p in parts)[:30] if parts else ""
 
 
@@ -102,7 +118,7 @@ def build_metadata(*, topic: dict, script: dict, facts: list[dict], sources: lis
         f"{name}, explained in {int(round(duration))} seconds",
         f"How {name} works",
         f"The story behind {name}",
-        f"{name}: {split_sentences(payoff)[0][:MAX_TITLE - len(name) - 2]}" if payoff else "",
+        f"{name}: {_clause(payoff, MAX_TITLE - len(name) - 2)}" if _clause(payoff, MAX_TITLE - len(name) - 2) else "",
         f"{name}: {blueprint['format'].replace('_', ' ').lower()}",
     ]
     scored = []
@@ -114,12 +130,17 @@ def build_metadata(*, topic: dict, script: dict, facts: list[dict], sources: lis
     titles = scored[:5]
 
     # -- sources + attributions (always included)
+    used_ids = {fid for sec in script["sections_json"] for x in sec["sentences"] for fid in x.get("fact_ids", [])}
     source_lines, seen = [], set()
     for f in facts:
-        key = f.get("source_url") or f.get("source_title")
-        if key and key not in seen:
-            seen.add(key)
-            source_lines.append(f"- {f.get('source_title') or ''} {f.get('source_url') or ''}".rstrip())
+        if used_ids and f["fact_id"] not in used_ids:
+            continue
+        for title, url in [(f.get("source_title"), f.get("source_url")),
+                           *[(e.get("title"), e.get("url")) for e in (f.get("extra_sources_json") or [])]]:
+            key = url or title
+            if key and key not in seen:
+                seen.add(key)
+                source_lines.append(f"- {title or ''} {url or ''}".rstrip())
     credit_lines = []
     for s in sources:
         lic = licenses.get(s["source_id"]) or {}

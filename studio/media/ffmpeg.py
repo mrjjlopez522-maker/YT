@@ -24,12 +24,12 @@ def require_binaries() -> None:
 
 
 def run(args: list[str], *, timeout: float = 900, what: str = "ffmpeg", capture_stdout: bool = False,
-        check: bool = True) -> subprocess.CompletedProcess:
+        check: bool = True, cwd: str | Path | None = None) -> subprocess.CompletedProcess:
     cmd = [str(a) for a in args]
     log.debug("%s: %s", what, " ".join(cmd))
     try:
         proc = subprocess.run(cmd, stdout=subprocess.PIPE if capture_stdout else subprocess.DEVNULL,
-                              stderr=subprocess.PIPE, timeout=timeout)
+                              stderr=subprocess.PIPE, timeout=timeout, cwd=str(cwd) if cwd else None)
     except subprocess.TimeoutExpired as exc:
         log.error("%s timed out after %ss", what, timeout)
         raise RenderError(f"{what} timed out after {timeout}s") from exc
@@ -127,12 +127,14 @@ def loudness(path: str | Path) -> dict:
     if start < 0 or end < 0:
         raise RenderError("could not parse loudnorm output")
     data = json.loads(text[start:end + 1])
+
     def f(key):
         try:
             return float(data[key])
         except (KeyError, ValueError):
             return float("-inf")
-    return {"integrated_lufs": f("input_i"), "true_peak_db": f("input_tp"), "lra": f("input_lra")}
+    return {"integrated_lufs": f("input_i"), "true_peak_db": f("input_tp"), "lra": f("input_lra"),
+            "threshold": f("input_thresh")}
 
 
 def decode_errors(path: str | Path) -> list[str]:
