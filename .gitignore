@@ -57,3 +57,11 @@ tiktok-engine/thumbnails/*
 tiktok-engine/analytics/*
 tiktok-engine/logs/*
 !tiktok-engine/*/.gitkeep
+
+# People app (Next.js)
+people/node_modules/
+people/.next/
+people/next-env.d.ts
+people/test-results/
+people/playwright-report/
+people/*.tsbuildinfo
