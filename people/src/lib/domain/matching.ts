@@ -120,11 +120,7 @@ export function scoreCandidate(c: Candidate, ctx: MatchContext): Match {
   const best = bestTopic(req, c.topics)!;
   const topicName = getTopic(best.t.topicId)?.name ?? best.t.topicId;
   score += best.aff >= 3 ? 40 : best.aff === 2 ? 30 : 15;
-  reasons.push(
-    best.t.kind === "professional"
-      ? `Describes professional experience in ${topicName.toLowerCase()}`
-      : `Shares lived experience with ${topicName.toLowerCase()}`,
-  );
+  reasons.push(best.t.kind === "professional" ? `Professional experience (self-described): ${topicName}` : `Lived experience: ${topicName}`);
 
   const verified = c.verifiedTopicIds.some((v) => topicAffinity(v, best.t.topicId) >= Math.min(2, topicLineage(v).length));
   if (verified) {

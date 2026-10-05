@@ -13,8 +13,13 @@ import { buildWhere, fromDb, toDb } from "./pg-sql";
 export class PgRepo implements Repo {
   constructor(private pool: Pool) {}
 
+  /**
+   * DATABASE_CA_CERT (PEM text, e.g. Supabase's downloadable root certificate)
+   * enables verified TLS. Leave sslmode out of DATABASE_URL when using it.
+   */
   static fromUrl(url: string) {
-    return new PgRepo(new Pool({ connectionString: url, max: 5 }));
+    const ca = process.env.DATABASE_CA_CERT?.replace(/\\n/g, "\n");
+    return new PgRepo(new Pool({ connectionString: url, max: 5, ...(ca ? { ssl: { ca, rejectUnauthorized: true } } : {}) }));
   }
 
   async tx<R>(fn: (tx: Tx) => Promise<R>): Promise<R> {

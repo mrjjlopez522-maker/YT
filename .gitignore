@@ -65,3 +65,4 @@ people/next-env.d.ts
 people/test-results/
 people/playwright-report/
 people/*.tsbuildinfo
+!people/.env.example

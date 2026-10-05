@@ -21,6 +21,10 @@ What it will not do:
 idea batches, original procedural visuals, a natural local voice, TikTok QC,
 and a dry-run Content Posting API client.
 
+**People:** a separate web app — *Someone knows. Meet them.* — that matches a person's question or goal with a
+human who can help by text, voice or video. It lives in [people/](people/README.md) (Next.js, Supabase, LiveKit)
+and runs in a labelled demo mode with no credentials.
+
 For the design, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). For YouTube
 Partner Program facts and what they mean for the business, see
 [docs/BUSINESS_RESEARCH.md](docs/BUSINESS_RESEARCH.md).

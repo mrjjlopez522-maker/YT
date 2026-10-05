@@ -30,6 +30,18 @@ export function emptyData(): Data {
 
 const clone = <V>(v: V): V => structuredClone(v);
 
+function checkUnique<T extends TableName>(table: T, rows: Tables[T][]) {
+  for (const u of UNIQUE[table] ?? []) {
+    const seen = new Set<string>();
+    for (const r of rows) {
+      if (u.when && !u.when(r)) continue;
+      const key = u.cols.map((c) => String(r[c])).join("|");
+      if (seen.has(key)) throw new ConflictError(`${table} unique(${u.cols.join(",")})`);
+      seen.add(key);
+    }
+  }
+}
+
 export class MemoryRepo implements Repo {
   data: Data;
   private lock: Promise<unknown> = Promise.resolve();
@@ -38,23 +50,10 @@ export class MemoryRepo implements Repo {
     this.data = data;
   }
 
-  private checkUnique<T extends TableName>(table: T, rows: Tables[T][]) {
-    for (const u of UNIQUE[table] ?? []) {
-      const seen = new Set<string>();
-      for (const r of rows) {
-        if (u.when && !u.when(r)) continue;
-        const key = u.cols.map((c) => String(r[c])).join("|");
-        if (seen.has(key)) throw new ConflictError(`${table} unique(${u.cols.join(",")})`);
-        seen.add(key);
-      }
-    }
-  }
-
   async tx<R>(fn: (tx: Tx) => Promise<R>): Promise<R> {
     const run = async () => {
       const snapshot = clone(this.data);
       const d = this.data;
-      const self = this;
       const tx: Tx = {
         async select<T extends TableName>(table: T, where?: Where<Tables[T]>, opts: SelectOpts<Tables[T]> = {}) {
           let rows = (d[table] as Tables[T][]).filter((r) => matches(r, where));
@@ -67,7 +66,7 @@ export class MemoryRepo implements Repo {
         },
         async insert<T extends TableName>(table: T, row: Tables[T]) {
           const next = [...(d[table] as Tables[T][]), clone(row)];
-          self.checkUnique(table, next);
+          checkUnique(table, next);
           (d[table] as Tables[T][]) = next;
           return clone(row);
         },
@@ -79,7 +78,7 @@ export class MemoryRepo implements Repo {
             out.push(n);
             return n;
           });
-          self.checkUnique(table, next);
+          checkUnique(table, next);
           (d[table] as Tables[T][]) = next;
           return clone(out);
         },

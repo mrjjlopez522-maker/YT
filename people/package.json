@@ -11,9 +11,11 @@
     "test:db": "DATABASE_URL_TEST=postgres://postgres:postgres@localhost:5432/people_test vitest run tests/db",
     "gen:topics": "tsx scripts/gen-topics-sql.ts",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "check:secrets": "bash scripts/check-client-secrets.sh"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
     "livekit-client": "^2.22.3",

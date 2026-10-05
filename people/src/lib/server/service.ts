@@ -27,6 +27,11 @@ export class AppError extends Error {
   }
 }
 
+/** Works across bundle boundaries, where `instanceof` can fail on duplicated classes. */
+export function isAppError(e: unknown): e is AppError {
+  return e instanceof AppError || (typeof e === "object" && e !== null && (e as Error).name === "AppError" && typeof (e as AppError).code === "string");
+}
+
 export const LIMITS = {
   requestsPerHour: 8,
   invitationsPerHour: 15,
